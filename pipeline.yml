@@ -1,0 +1,73 @@
+resource_types:
+- name: bosh-deployment
+  type: docker-image
+  source:
+    repository: cloudfoundry/bosh-deployment-resource
+
+resources:
+- name: Deployment-nginx
+  type: git
+  source:
+    uri: https://github.com/nlmontes/deployment-nginx.git
+- name: boshrelease-nginx
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry-community/nginx-release
+- name: stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-warden-boshlite-ubuntu-xenial-go_agent
+    version_family: latest
+
+- name: deploy-nginx
+  type: bosh-deployment
+  source:
+    deployment: nginx
+    target: 192.168.50.6
+    client: admin
+    client_secret: 96ac58nw2fcc9tn00ayq
+    ca_cert: |
+      -----BEGIN CERTIFICATE-----
+      MIIEVDCCArygAwIBAgIRAP3ecwPYQJ0LQqkPFNtF7lMwDQYJKoZIhvcNAQELBQAw
+      MzEMMAoGA1UEBhMDVVNBMRYwFAYDVQQKEw1DbG91ZCBGb3VuZHJ5MQswCQYDVQQD
+      EwJjYTAeFw0yMDA2MjkxMDM0MDNaFw0yMTA2MjkxMDM0MDNaMDMxDDAKBgNVBAYT
+      A1VTQTEWMBQGA1UEChMNQ2xvdWQgRm91bmRyeTELMAkGA1UEAxMCY2EwggGiMA0G
+      CSqGSIb3DQEBAQUAA4IBjwAwggGKAoIBgQDCLZrq77jx6EBdJ6F+uZhuRq0n/ba0
+      C+n3SuM4slJhWIvHNLJeVctvBUSe8uQead4VaYydmDKMxtUTrVNzDSv9vF9w8+JK
+      finOZnqI+490MY37HtKSnu/oKJGER7Fd81ZROU8Nhe2O9zOB0gTpMhOUL7XrLvFZ
+      j6eE9nj8lPbi7d1RaXZqzyufOTDhGD7VtxzDbOW1rcjHgD6GLrhJskwdsu0+6Qn+
+      cqd85bE9H5xzLZ+KjkEK39YHWp/UZJMXlkPEyz12WbXTclS7rSdfarmkZul68WqH
+      M1NjwyNk0lk1hwARHgIiuhWVcbHfDXxGqwpv5CT9rgb+xu6HNl8F0GDKLnNKd9BU
+      BUF/tQ+u6wZ3z2JPzZ1fJd6hH0tVju/HrxmSiE2vmznRsdUHoaVezwXWnh+yBh3T
+      4RuO1CLYvsqwJyzI75vdGu/LXk1b8+lhXgdKSglyO70+ho8S1L5odLUG+HAEU2yG
+      0HpnWrcIWTQRfIcQngwXFQbrRXnPncfg5H0CAwEAAaNjMGEwDgYDVR0PAQH/BAQD
+      AgEGMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFPpl0puwGgiPYVL1wSpljFL1
+      HXGhMB8GA1UdIwQYMBaAFPpl0puwGgiPYVL1wSpljFL1HXGhMA0GCSqGSIb3DQEB
+      CwUAA4IBgQCmx4Zl8TXxrGFQ1yBd0nOH5sYEgMX2Sccny0lw0RzUsP16I7HEJMKt
+      lWwMze6zoUk1sAbpHxo/IIOk/uy5IPpJ+PMbk9T90nwYzPiCyVpMFiJGqWZIWGrn
+      oGlU5C40lExc+p1mLn/BRNkqyob7h8ttLXZKzRy0eba1MitAUq7i2fywhhp2LnWt
+      NZkeBZpetRrMuPqMMxzejDWmpQEXeld+o92qZWedjbkz4eXwoobu745IZkx7AOcQ
+      R5xiws597Jb7GqpV2NvRBAqKyj2YdM+wMrs1rKHmBMCURBG/GUB1CnvaFMzv8WyO
+      XJCPi36MDeloqzlxZTdjZXkRSaZpOTmuOCKA9pzARcGpUzqcT6pwf+41z4xuAvGZ
+      GVdMxUHv87ZWKNSFo1VFRlFsjR5Uix8h8PHg8cJp+DYPbMk5ic7v0klsVJjBFWPW
+      oxmd3kut075PYvOU5tzOrv2Xu1/mB1XMpYSlYfQOT14aorSKhFThn5ckuXcu/h+M
+      MpTp+8ZVIPI=
+      -----END CERTIFICATE-----
+
+jobs:
+- name: deploy-nginx
+  plan:
+  - aggregate:
+    - get: Deployment-nginx
+      trigger: true
+    - get: stemcell
+      trigger: true
+    - get: boshrelease-nginx
+      trigger: true
+  - put: deploy-nginx
+    params:
+      manifest: Deployment-nginx/nginx.yml
+      stemcells:
+      - stemcell/stemcell.tgz
+      releases:
+      - boshrelease-nginx/release.tgz
