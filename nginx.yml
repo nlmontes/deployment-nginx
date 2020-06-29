@@ -2,8 +2,10 @@
 name: nginx
 
 releases:
-- name: nginx
-  version: latest
+- name: "nginx"
+  version: "1.19.0"
+  url: "https://bosh.io/d/github.com/cloudfoundry-community/nginx-release?v=1.19.0"
+  sha1: "afd029140755ba4a9314299c84d4a5f133adca36"
 
 stemcells:
 # Centos 3421.11 _appears_ not to work under BOSH Lite
@@ -13,7 +15,7 @@ stemcells:
 
 instance_groups:
 - name: nginx
-  instances: 3
+  instances: 2
   azs: [z1]
   vm_type: default
   persistent_disk_type: default
